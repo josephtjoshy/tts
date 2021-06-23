@@ -28,16 +28,28 @@ class _MyAppState extends State<MyApp> {
     await speechToText.listen(
       onResult: (val) => setState(() {
         result = val.recognizedWords;
+        if (result == 'hi') {
+          speakHelow();
+          setState(() {
+            output = "Heloooo";
+          });
+        } else {
+          speechToText.stop();
+          setState(() {
+            listenSpeak(result).whenComplete(() => speechToText);
+            output = "Listening";
+          });
+        }
       }),
-    ).then((value) => speak());
+    );
   }
 
-  Future speak() async {
-    if (result.toLowerCase() == 'hi') {
-      setState(() {
-        output = "Heloooo";
-      });
-    }
+  Future speakHelow() async {
+    await flutterTts.speak('Helooo');
+  }
+
+  Future listenSpeak(word) async {
+    await flutterTts.speak('$word');
   }
 
   @override
@@ -46,9 +58,7 @@ class _MyAppState extends State<MyApp> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            _listen();
-          });
+          _listen();
         },
       ),
       body: Center(
